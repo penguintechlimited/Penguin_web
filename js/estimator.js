@@ -1,163 +1,108 @@
-﻿/**
- * Penguin Tech Limited - Interactive Project Scope & ROI Estimator
- * Calculates estimated development sprints, deliverables, and projected revenue growth
- */
 
-const ESTIMATOR_DATA = {
-  web: {
-    basePrice: 3500,
-    baseDays: 14,
-    tiers: {
-      landing: { name: "High-Converting Landing Page", mult: 1, roi: "3.5x - 5x Conversion Lift", sprint: "1-2 Weeks" },
-      ecommerce: { name: "Full-Scale E-Commerce Store", mult: 2.2, roi: "$40k - $250k Monthly Run-Rate", sprint: "3-5 Weeks" },
-      corporate: { name: "Enterprise Corporate Platform", mult: 1.8, roi: "2.8x Lead Quality Surge", sprint: "3-4 Weeks" }
-    }
-  },
-  app: {
-    basePrice: 6500,
-    baseDays: 28,
-    tiers: {
-      mvp: { name: "Cross-Platform MVP (iOS & Android)", mult: 1, roi: "Rapid Go-To-Market & Retention", sprint: "4-6 Weeks" },
-      booking: { name: "On-Demand / Booking Platform", mult: 1.6, roi: "Automates 80% Booking Ops", sprint: "6-8 Weeks" },
-      enterprise: { name: "Custom SaaS / Fintech Application", mult: 2.5, roi: "Enterprise Scale & Sub-50ms Latency", sprint: "8-12 Weeks" }
-    }
-  },
-  marketing: {
-    basePrice: 2000,
-    baseDays: 30,
-    tiers: {
-      social: { name: "Social Content & Brand Authority", mult: 1, roi: "+250% Organic Engagement", sprint: "Monthly Retainer" },
-      ads: { name: "Performance Meta & Google Ads", mult: 1.5, roi: "3.5x - 7.2x Target ROAS", sprint: "Monthly Retainer" },
-      full_growth: { name: "Full Scale Growth Engine (Ads + Content + CRO)", mult: 2.4, roi: "$100k+ Incremental Pipeline", sprint: "Monthly Retainer" }
-    }
-  },
-  ecosystem: {
-    basePrice: 9500,
-    baseDays: 45,
-    tiers: {
-      hybrid: { name: "Web Infrastructure + Paid Ads Engine", mult: 1.2, roi: "Full Flywheel: 4.8x Expected Blended ROAS", sprint: "Complete Sprint + Retainer" },
-      omnichannel: { name: "Web + Mobile App + Performance Retainer", mult: 1.8, roi: "Unfair Market Advantage & Omnichannel Scale", sprint: "End-to-End Agency Blueprint" }
-    }
-  }
-};
+/* =============================================
+   PENGUIN TECH LIMITED — estimator.js v2
+   ============================================= */
 
-function calculateEstimate() {
-  const category = document.querySelector('input[name="estimator-category"]:checked')?.value || 'web';
-  const tierSelect = document.getElementById('estimator-tier');
-  const speedSlider = document.getElementById('estimator-speed');
-  const speedVal = parseInt(speedSlider?.value || 1);
+(function() {
+  'use strict';
+
+  const data = {
+    web: {
+      label: 'Web & Landing Pages',
+      tiers: [
+        { name: 'High-Converting Landing Page', price: 250, delivery: '5-7 days', scope: 'Single page, CRO-optimised, SEO setup' },
+        { name: 'Brochure / Corporate Site', price: 600, delivery: '10-14 days', scope: '5-8 pages, CMS, contact forms' },
+        { name: 'Full Corporate Website', price: 1500, delivery: '3-4 weeks', scope: '10+ pages, blog, integrations' },
+      ]
+    },
+    ecom: {
+      label: 'E-Commerce',
+      tiers: [
+        { name: 'Starter Store', price: 1200, delivery: '2-3 weeks', scope: 'Up to 50 products, payment gateway, mobile-first' },
+        { name: 'Growth Store', price: 2500, delivery: '4-5 weeks', scope: '50-500 products, advanced filters, loyalty system' },
+        { name: 'Enterprise Commerce', price: 5000, delivery: '6-10 weeks', scope: 'Unlimited SKUs, custom ERP/API, multi-currency' },
+      ]
+    },
+    app: {
+      label: 'Mobile Applications',
+      tiers: [
+        { name: 'MVP App', price: 3000, delivery: '6-8 weeks', scope: 'iOS + Android, core features, push notifications' },
+        { name: 'Growth App', price: 6000, delivery: '10-14 weeks', scope: 'Full feature set, analytics, in-app purchases' },
+        { name: 'Enterprise App', price: 12000, delivery: '16-24 weeks', scope: 'Custom backend, CMS, white-label ready' },
+      ]
+    },
+    marketing: {
+      label: 'Digital Marketing',
+      tiers: [
+        { name: 'Social Media Starter', price: 350, delivery: 'Monthly retainer', scope: '4 platforms, 20 posts/mo, community management' },
+        { name: 'Performance Growth Pack', price: 800, delivery: 'Monthly retainer', scope: 'Meta + Google Ads, up to $5k ad budget managed' },
+        { name: 'Full-Stack Growth Engine', price: 2000, delivery: 'Monthly retainer', scope: 'SMM + Ads + SEO + CRO + Monthly reporting' },
+      ]
+    }
+  };
+
+  const speedMultipliers = { 1: 1, 2: 1.15, 3: 1.35 };
+  const speedLabels = { 1: 'Standard', 2: 'Priority (+15%)', 3: 'Rush (+35%)' };
+
+  const catRadios = document.querySelectorAll('input[name="est-cat"]');
+  const tierSelect = document.getElementById('est-tier');
+  const speedRange = document.getElementById('est-speed');
+  const speedVal = document.getElementById('est-speed-val');
+  const priceEl = document.getElementById('est-price');
+  const priceSuffix = document.getElementById('est-price-suffix');
+  const rowTier = document.getElementById('est-row-tier');
+  const rowDelivery = document.getElementById('est-row-delivery');
+  const rowScope = document.getElementById('est-row-scope');
+  const rowTotal = document.getElementById('est-row-total');
 
   if (!tierSelect) return;
 
-  const currentCategoryData = ESTIMATOR_DATA[category];
-  const selectedTierKey = tierSelect.value;
-  const tierData = currentCategoryData.tiers[selectedTierKey] || Object.values(currentCategoryData.tiers)[0];
-
-  // Base math
-  let price = currentCategoryData.basePrice * tierData.mult;
-  
-  // Speed multiplier
-  if (speedVal === 2) {
-    price *= 1.25; // Priority Turbo sprint
+  function getCategory() {
+    for (const r of catRadios) { if (r.checked) return r.value; }
+    return 'web';
   }
 
-  // Display updates
-  const priceDisplay = document.getElementById('est-price-display');
-  const sprintDisplay = document.getElementById('est-sprint-display');
-  const roiDisplay = document.getElementById('est-roi-display');
-  const deliverablesList = document.getElementById('est-deliverables-list');
-
-  if (priceDisplay) {
-    priceDisplay.textContent = `$${Math.round(price).toLocaleString()}` + (category === 'marketing' ? '/mo' : '');
+  function populateTiers(cat) {
+    tierSelect.innerHTML = '';
+    data[cat].tiers.forEach((t, i) => {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = t.name;
+      tierSelect.appendChild(opt);
+    });
   }
 
-  if (sprintDisplay) {
-    sprintDisplay.textContent = speedVal === 2 ? `${tierData.sprint} (Expedited Sprint)` : tierData.sprint;
+  function update() {
+    const cat = getCategory();
+    const tierIdx = parseInt(tierSelect.value) || 0;
+    const speed = parseInt(speedRange?.value) || 1;
+    const tier = data[cat].tiers[tierIdx];
+    const mul = speedMultipliers[speed] || 1;
+    const price = Math.round(tier.price * mul);
+
+    const isRetainer = tier.delivery.includes('Monthly');
+    speedVal.textContent = speedLabels[speed];
+    priceEl.textContent = '$' + price.toLocaleString();
+    priceSuffix.textContent = isRetainer ? '/mo' : '';
+
+    if (rowTier) rowTier.textContent = tier.name;
+    if (rowDelivery) rowDelivery.textContent = tier.delivery;
+    if (rowScope) rowScope.textContent = tier.scope;
+    if (rowTotal) rowTotal.textContent = '$' + price.toLocaleString() + (isRetainer ? '/mo' : '');
   }
 
-  if (roiDisplay) {
-    roiDisplay.textContent = tierData.roi;
-  }
-
-  // Populate dynamic deliverables
-  if (deliverablesList) {
-    let items = [];
-    if (category === 'web') {
-      items = [
-        "Sub-second TTFB & Core Web Vitals 95+ score",
-        "Conversion-engineered UI/UX Architecture",
-        "Integrated Analytics & Meta Pixel / GA4 Setup",
-        "CI/CD Pipeline to Vercel/Cloudflare"
-      ];
-    } else if (category === 'app') {
-      items = [
-        "Native iOS & Android compilation (React Native/Flutter)",
-        "Secure API Layer & Database architecture",
-        "Push Notifications & Frictionless Auth Flow",
-        "App Store & Google Play submission readiness"
-      ];
-    } else if (category === 'marketing') {
-      items = [
-        "Weekly High-ROAS Creative Ad Testing",
-        "Full Funnel Retargeting & Lookalike Audience Engine",
-        "Bi-weekly Strategy Reviews & Conversion Optimization",
-        "Live Datadog / Looker Performance Dashboard"
-      ];
-    } else {
-      items = [
-        "Complete Web/App Digital Infrastructure Build",
-        "Automated n8n Operations & Lead routing",
-        "Dedicated Growth Strategist & Paid Ads Deployment",
-        "Weekly Scale Sprints & Zero-Fluff Executive Reporting"
-      ];
-    }
-
-    deliverablesList.innerHTML = items.map(item => `
-      <li class="flex items-center space-x-2 text-sm text-slate-300">
-        <svg class="w-4 h-4 text-cyan-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-        </svg>
-        <span>${item}</span>
-      </li>
-    `).join('');
-  }
-}
-
-function updateTierOptions() {
-  const category = document.querySelector('input[name="estimator-category"]:checked')?.value || 'web';
-  const tierSelect = document.getElementById('estimator-tier');
-  if (!tierSelect) return;
-
-  const categoryData = ESTIMATOR_DATA[category];
-  tierSelect.innerHTML = '';
-
-  for (const [key, tier] of Object.entries(categoryData.tiers)) {
-    const opt = document.createElement('option');
-    opt.value = key;
-    opt.textContent = tier.name;
-    tierSelect.appendChild(opt);
-  }
-
-  calculateEstimate();
-}
-
-window.initEstimator = function() {
-  const catInputs = document.querySelectorAll('input[name="estimator-category"]');
-  catInputs.forEach(input => {
-    input.addEventListener('change', () => {
-      updateTierOptions();
+  catRadios.forEach(r => {
+    r.addEventListener('change', () => {
+      populateTiers(r.value);
+      update();
     });
   });
 
-  const tierSelect = document.getElementById('estimator-tier');
-  if (tierSelect) {
-    tierSelect.addEventListener('change', calculateEstimate);
-  }
+  tierSelect.addEventListener('change', update);
+  speedRange?.addEventListener('input', update);
 
-  const speedSlider = document.getElementById('estimator-speed');
-  if (speedSlider) {
-    speedSlider.addEventListener('input', calculateEstimate);
-  }
+  // Init
+  populateTiers(getCategory());
+  update();
 
-  updateTierOptions();
-};
+})();
