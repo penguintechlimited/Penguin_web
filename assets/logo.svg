@@ -1,0 +1,55 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F0FF" />
+      <stop offset="100%" stop-color="#3B82F6" />
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366F1" />
+      <stop offset="100%" stop-color="#A855F7" />
+    </linearGradient>
+    <linearGradient id="darkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B0F19" />
+      <stop offset="100%" stop-color="#111827" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Ambient Glow -->
+  <circle cx="250" cy="250" r="180" fill="#00F0FF" opacity="0.12" filter="url(#glow)"/>
+
+  <!-- Outer Tech Hexagon / Shield -->
+  <polygon points="250,40 430,145 430,355 250,460 70,355 70,145" fill="url(#darkGrad)" stroke="url(#cyanGrad)" stroke-width="6" stroke-linejoin="round"/>
+  
+  <!-- Subtle Circuit Grid Accents -->
+  <path d="M 120 175 L 180 175 L 210 205" stroke="#00F0FF" stroke-width="2" stroke-linecap="round" opacity="0.4" fill="none"/>
+  <circle cx="120" cy="175" r="4" fill="#00F0FF" opacity="0.6"/>
+  
+  <path d="M 380 325 L 320 325 L 290 295" stroke="#A855F7" stroke-width="2" stroke-linecap="round" opacity="0.4" fill="none"/>
+  <circle cx="380" cy="325" r="4" fill="#A855F7" opacity="0.6"/>
+
+  <!-- Stylized Geometric Penguin Head & Body -->
+  <!-- Outer Body / Wings -->
+  <path d="M 250,105 C 200,105 160,165 160,250 C 160,330 200,380 250,380 C 300,380 340,330 340,250 C 340,165 300,105 250,105 Z" fill="#0B132B" stroke="url(#cyanGrad)" stroke-width="4"/>
+  
+  <!-- Inner White/Cyan Tech Belly -->
+  <path d="M 250,165 C 220,165 200,210 200,270 C 200,330 220,365 250,365 C 280,365 300,330 300,270 C 300,210 280,165 250,165 Z" fill="#E2F1FF" opacity="0.95"/>
+  
+  <!-- Angular Tech Beak (Forward pointing geometric chevron) -->
+  <polygon points="232,185 268,185 250,220" fill="url(#cyanGrad)"/>
+
+  <!-- Futuristic Cyber Visor / Eyes -->
+  <rect x="220" y="152" width="22" height="6" rx="3" fill="#00F0FF" filter="url(#glow)"/>
+  <rect x="258" y="152" width="22" height="6" rx="3" fill="#00F0FF" filter="url(#glow)"/>
+
+  <!-- Tech Wing Accents -->
+  <path d="M 162 250 L 130 290 L 175 320" stroke="url(#cyanGrad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M 338 250 L 370 290 L 325 320" stroke="url(#purpleGrad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Core Pulsing Node -->
+  <circle cx="250" cy="285" r="8" fill="#00F0FF" filter="url(#glow)"/>
+  <circle cx="250" cy="285" r="4" fill="#FFFFFF"/>
+</svg>
