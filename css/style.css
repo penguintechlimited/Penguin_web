@@ -26,7 +26,11 @@
 html { scroll-behavior: smooth; font-size: 16px; -webkit-font-smoothing: antialiased; }
 
 body {
-  background: var(--bg);
+  background:
+    radial-gradient(ellipse 80% 60% at 90% 10%, rgba(0,240,255,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 10% 90%, rgba(0,240,255,0.025) 0%, transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
   color: var(--white);
   font-family: var(--font-body);
   overflow-x: hidden;
@@ -150,6 +154,10 @@ body {
   position: relative;
   overflow: hidden;
   border-bottom: 1px solid var(--line);
+  background: radial-gradient(ellipse 100% 90% at 70% 0%, rgba(0,240,255,0.055) 0%, var(--bg) 55%),
+              radial-gradient(ellipse 60% 50% at 20% 100%, rgba(0,240,255,0.03) 0%, transparent 70%),
+              var(--bg);
+  isolation: isolate;
 }
 
 /* Large ambient architectural grid */
@@ -157,29 +165,37 @@ body {
   content: '';
   position: absolute;
   inset: 0;
+  z-index: 0;
   background-image:
-    linear-gradient(rgba(0,240,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,240,255,0.03) 1px, transparent 1px);
+    linear-gradient(rgba(0,240,255,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,240,255,0.045) 1px, transparent 1px);
   background-size: 80px 80px;
-  mask-image: radial-gradient(ellipse 80% 80% at 60% 40%, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 80% at 65% 35%, black 20%, transparent 75%);
+  mask-image: radial-gradient(ellipse 90% 80% at 65% 35%, black 20%, transparent 75%);
+  pointer-events: none;
 }
 
 /* Radial cyan glow center-right */
 #hero::after {
   content: '';
   position: absolute;
-  top: -10%;
-  right: -5%;
-  width: 60vw;
-  height: 70vh;
-  background: radial-gradient(ellipse, rgba(0,240,255,0.06) 0%, transparent 65%);
+  top: -15%;
+  right: -8%;
+  width: 65vw;
+  height: 75vh;
+  z-index: 1;
+  background: radial-gradient(ellipse at center,
+    rgba(0,240,255,0.11) 0%,
+    rgba(0,240,255,0.06) 30%,
+    transparent 65%);
   pointer-events: none;
 }
 
 .hero-canvas {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: 2;
+  opacity: 0.7;
 }
 
 /* Status indicator top-left */
@@ -195,7 +211,7 @@ body {
   color: var(--muted);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  z-index: 2;
+  z-index: 5;
 }
 
 .hero-status-dot {
@@ -223,13 +239,13 @@ body {
   color: var(--muted);
   letter-spacing: 0.12em;
   font-variant-numeric: tabular-nums;
-  z-index: 2;
+  z-index: 5;
 }
 
 /* The main headline — full bleed, no container max-width */
 .hero-headline {
   position: relative;
-  z-index: 2;
+  z-index: 5;
   margin-bottom: 40px;
 }
 
