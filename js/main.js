@@ -1,20 +1,20 @@
 
 /* =============================================
-   PENGUIN TECH LIMITED — main.js v4
-   Mobile-Optimized Constellation & Touch Engine
+   PENGUIN TECH LIMITED — main.js v5
+   Dynamic Canvas, Mobile Navigation & UI Engine
    ============================================= */
 
 (function() {
   'use strict';
 
-  /* ─── NAV SCROLL ─── */
+  /* ─── NAV SCROLL & BLUR ─── */
   const nav = document.getElementById('nav');
   function onScroll() {
-    if (nav) nav.classList.toggle('scrolled', window.scrollY > 30);
+    if (nav) nav.classList.toggle('scrolled', window.scrollY > 25);
   }
   window.addEventListener('scroll', onScroll, { passive: true });
 
-  /* ─── MOBILE NAV ─── */
+  /* ─── MOBILE NAV MENU ─── */
   const toggle = document.getElementById('nav-toggle');
   const mobileMenu = document.getElementById('mobile-nav-menu');
   if (toggle && mobileMenu) {
@@ -30,23 +30,23 @@
     });
   }
 
-  /* ─── HERO ANIMATION ─── */
+  /* ─── HERO WORD ENTRANCE ANIMATION ─── */
   window.addEventListener('DOMContentLoaded', () => {
     const h1 = document.querySelector('.hero-headline h1');
     const desc = document.querySelector('.hero-descriptor');
     const actions = document.querySelector('.hero-actions');
     if (h1) setTimeout(() => h1.classList.add('animated'), 60);
-    if (desc) setTimeout(() => desc.classList.add('animated'), 200);
-    if (actions) setTimeout(() => actions.classList.add('animated'), 320);
+    if (desc) setTimeout(() => desc.classList.add('animated'), 180);
+    if (actions) setTimeout(() => actions.classList.add('animated'), 280);
   });
 
-  /* ─── INTERACTIVE PARTICLE & CONSTELLATION CANVAS ─── */
+  /* ─── INTERACTIVE PARTICLE & CONSTELLATION CANVAS (FB BLUE) ─── */
   const canvas = document.getElementById('hero-canvas');
   if (canvas) {
     const ctx = canvas.getContext('2d');
     const hero = document.getElementById('hero');
     let W = 0, H = 0, particles = [], rafId;
-    let mouse = { x: -1000, y: -1000, radius: 160 };
+    let mouse = { x: -1000, y: -1000, radius: 150 };
 
     function resize() {
       const rect = hero ? hero.getBoundingClientRect() : { width: window.innerWidth, height: window.innerHeight };
@@ -58,26 +58,27 @@
     Particle.prototype.reset = function() {
       this.x  = Math.random() * W;
       this.y  = Math.random() * H;
-      this.vx = (Math.random() - 0.5) * (window.innerWidth < 768 ? 0.25 : 0.4);
-      this.vy = (Math.random() - 0.5) * (window.innerWidth < 768 ? 0.25 : 0.4);
-      this.r  = Math.random() * 1.4 + 0.6;
-      this.baseAlpha = Math.random() * 0.35 + 0.12;
+      const isMobile = window.innerWidth < 768;
+      this.vx = (Math.random() - 0.5) * (isMobile ? 0.22 : 0.35);
+      this.vy = (Math.random() - 0.5) * (isMobile ? 0.22 : 0.35);
+      this.r  = Math.random() * 1.5 + 0.6;
+      this.baseAlpha = Math.random() * 0.32 + 0.12;
       this.alpha = this.baseAlpha;
     };
     Particle.prototype.update = function() {
       this.x += this.vx;
       this.y += this.vy;
 
-      // Mouse proximity interaction (desktop only for performance)
+      // Mouse proximity interaction (desktop)
       if (mouse.x > 0 && mouse.y > 0) {
         const dx = mouse.x - this.x;
         const dy = mouse.y - this.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < mouse.radius) {
-          const force = (1 - dist / mouse.radius) * 0.8;
+          const force = (1 - dist / mouse.radius) * 0.7;
           this.x -= (dx / dist) * force;
           this.y -= (dy / dist) * force;
-          this.alpha = Math.min(0.8, this.baseAlpha + (1 - dist / mouse.radius) * 0.5);
+          this.alpha = Math.min(0.75, this.baseAlpha + (1 - dist / mouse.radius) * 0.45);
         } else {
           this.alpha = this.baseAlpha;
         }
@@ -88,7 +89,7 @@
     Particle.prototype.draw = function() {
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0,82,255,' + this.alpha + ')';
+      ctx.fillStyle = 'rgba(24,119,242,' + this.alpha + ')';
       ctx.fill();
     };
 
@@ -96,14 +97,15 @@
       resize();
       particles = [];
       const isMobile = window.innerWidth < 768;
-      const count = isMobile ? 35 : Math.min(120, Math.max(45, Math.round((W * H) / 9500)));
+      const count = isMobile ? 30 : Math.min(100, Math.max(40, Math.round((W * H) / 11000)));
       for (let i = 0; i < count; i++) particles.push(new Particle());
     }
 
-    const CONN = window.innerWidth < 768 ? 100 : 140;
-
     function animate() {
       ctx.clearRect(0, 0, W, H);
+      const isMobile = window.innerWidth < 768;
+      const CONN = isMobile ? 90 : 130;
+      
       for (let i = 0; i < particles.length; i++) {
         particles[i].update();
         particles[i].draw();
@@ -116,8 +118,8 @@
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            const lineAlpha = (1 - dist / CONN) * 0.14;
-            ctx.strokeStyle = 'rgba(0,82,255,' + lineAlpha + ')';
+            const lineAlpha = (1 - dist / CONN) * 0.15;
+            ctx.strokeStyle = 'rgba(24,119,242,' + lineAlpha + ')';
             ctx.lineWidth = 0.65;
             ctx.stroke();
           }
@@ -155,7 +157,7 @@
     }, { passive: true });
   }
 
-  /* ─── SCROLL REVEAL ─── */
+  /* ─── SCROLL REVEAL OBSERVER ─── */
   const revealEls = document.querySelectorAll('.reveal');
   if (revealEls.length) {
     const observer = new IntersectionObserver((entries) => {
@@ -210,7 +212,7 @@
     });
   });
 
-  /* ─── WORK FILTER ─── */
+  /* ─── WORK CATEGORY FILTER ─── */
   const filterBtns = document.querySelectorAll('.work-filter-btn');
   const workItems  = document.querySelectorAll('.work-item');
   filterBtns.forEach(btn => {
@@ -231,7 +233,7 @@
     });
   });
 
-  /* ─── MODAL TRIGGER & FORM SUBMIT ─── */
+  /* ─── MODAL TRIGGER & FORM SUBMISSION ─── */
   const modal = document.getElementById('modal-backdrop');
   const modalClose = document.getElementById('modal-close');
   const modalForm = document.getElementById('modal-form');
@@ -271,7 +273,7 @@
     });
   }
 
-  /* ─── QUICK SERVICE CARD TO ESTIMATOR HOOK ─── */
+  /* ─── QUICK SERVICE CARD TO ESTIMATOR JUMP ─── */
   window.jumpToEstimator = function(cat) {
     const radio = document.querySelector(`input[name="est-cat"][value="${cat}"]`);
     if (radio) {
