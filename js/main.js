@@ -1,6 +1,7 @@
 
 /* =============================================
-   PENGUIN TECH LIMITED — main.js v2
+   PENGUIN TECH LIMITED — main.js v3
+   Interactive Constellation Canvas & UX Enhancements
    ============================================= */
 
 (function() {
@@ -9,7 +10,7 @@
   /* ─── NAV SCROLL ─── */
   const nav = document.getElementById('nav');
   function onScroll() {
-    nav.classList.toggle('scrolled', window.scrollY > 60);
+    if (nav) nav.classList.toggle('scrolled', window.scrollY > 40);
   }
   window.addEventListener('scroll', onScroll, { passive: true });
 
@@ -34,19 +35,19 @@
     const h1 = document.querySelector('.hero-headline h1');
     const desc = document.querySelector('.hero-descriptor');
     const actions = document.querySelector('.hero-actions');
-    if (h1) setTimeout(() => h1.classList.add('animated'), 120);
-    if (desc) setTimeout(() => desc.classList.add('animated'), 300);
-    if (actions) setTimeout(() => actions.classList.add('animated'), 400);
+    if (h1) setTimeout(() => h1.classList.add('animated'), 80);
+    if (desc) setTimeout(() => desc.classList.add('animated'), 240);
+    if (actions) setTimeout(() => actions.classList.add('animated'), 360);
   });
 
-  /* ─── PARTICLE CANVAS ─── */
+  /* ─── INTERACTIVE PARTICLE & CONSTELLATION CANVAS ─── */
   const canvas = document.getElementById('hero-canvas');
   if (canvas) {
     const ctx = canvas.getContext('2d');
     const hero = document.getElementById('hero');
     let W = 0, H = 0, particles = [], rafId;
+    let mouse = { x: -1000, y: -1000, radius: 180 };
 
-    // FIX: read from parent hero element, not canvas itself (canvas has no intrinsic size)
     function resize() {
       const rect = hero ? hero.getBoundingClientRect() : { width: window.innerWidth, height: window.innerHeight };
       W = canvas.width = Math.round(rect.width || window.innerWidth);
@@ -57,31 +58,46 @@
     Particle.prototype.reset = function() {
       this.x  = Math.random() * W;
       this.y  = Math.random() * H;
-      this.vx = (Math.random() - 0.5) * 0.45;
-      this.vy = (Math.random() - 0.5) * 0.45;
-      this.r  = Math.random() * 1.4 + 0.4;
-      this.alpha = Math.random() * 0.4 + 0.08;
+      this.vx = (Math.random() - 0.5) * 0.4;
+      this.vy = (Math.random() - 0.5) * 0.4;
+      this.r  = Math.random() * 1.5 + 0.6;
+      this.baseAlpha = Math.random() * 0.35 + 0.12;
+      this.alpha = this.baseAlpha;
     };
     Particle.prototype.update = function() {
       this.x += this.vx;
       this.y += this.vy;
-      if (this.x < -5 || this.x > W + 5 || this.y < -5 || this.y > H + 5) this.reset();
+
+      // Mouse proximity interaction
+      const dx = mouse.x - this.x;
+      const dy = mouse.y - this.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < mouse.radius) {
+        const force = (1 - dist / mouse.radius) * 0.8;
+        this.x -= (dx / dist) * force;
+        this.y -= (dy / dist) * force;
+        this.alpha = Math.min(0.8, this.baseAlpha + (1 - dist / mouse.radius) * 0.5);
+      } else {
+        this.alpha = this.baseAlpha;
+      }
+
+      if (this.x < -10 || this.x > W + 10 || this.y < -10 || this.y > H + 10) this.reset();
     };
     Particle.prototype.draw = function() {
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0,87,255,' + this.alpha + ')';
+      ctx.fillStyle = 'rgba(0,82,255,' + this.alpha + ')';
       ctx.fill();
     };
 
     function init() {
       resize();
       particles = [];
-      const count = Math.min(150, Math.round((W * H) / 8000));
+      const count = Math.min(130, Math.max(45, Math.round((W * H) / 9500)));
       for (let i = 0; i < count; i++) particles.push(new Particle());
     }
 
-    const CONN = 150;
+    const CONN = 140;
 
     function animate() {
       ctx.clearRect(0, 0, W, H);
@@ -91,14 +107,15 @@
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
           const dy = particles[i].y - particles[j].y;
-          const d = dx*dx + dy*dy;
+          const d = dx * dx + dy * dy;
           if (d < CONN * CONN) {
             const dist = Math.sqrt(d);
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = 'rgba(0,87,255,' + ((1 - dist/CONN) * 0.12) + ')';
-            ctx.lineWidth = 0.6;
+            const lineAlpha = (1 - dist / CONN) * 0.14;
+            ctx.strokeStyle = 'rgba(0,82,255,' + lineAlpha + ')';
+            ctx.lineWidth = 0.65;
             ctx.stroke();
           }
         }
@@ -106,7 +123,23 @@
       rafId = requestAnimationFrame(animate);
     }
 
-    // FIX: wait for layout paint before reading dimensions
+    window.addEventListener('mousemove', (e) => {
+      if (!hero) return;
+      const rect = hero.getBoundingClientRect();
+      if (e.clientY <= rect.bottom) {
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+      } else {
+        mouse.x = -1000;
+        mouse.y = -1000;
+      }
+    }, { passive: true });
+
+    window.addEventListener('mouseleave', () => {
+      mouse.x = -1000;
+      mouse.y = -1000;
+    });
+
     requestAnimationFrame(function() {
       init();
       animate();
@@ -129,7 +162,7 @@
           observer.unobserve(e.target);
         }
       });
-    }, { threshold: 0.1, rootMargin: '0px 0px -48px 0px' });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
     revealEls.forEach(el => observer.observe(el));
   }
 
@@ -138,108 +171,114 @@
     const target = parseFloat(el.dataset.target);
     const suffix = el.dataset.suffix || '';
     const prefix = el.dataset.prefix || '';
-    const isFloat = target % 1 !== 0;
     const duration = 1800;
     const startTime = performance.now();
+
     function step(now) {
-      const elapsed = Math.min(now - startTime, duration);
-      const progress = 1 - Math.pow(1 - elapsed / duration, 4);
-      const val = target * progress;
-      el.textContent = prefix + (isFloat ? val.toFixed(1) : Math.round(val)) + suffix;
-      if (elapsed < duration) requestAnimationFrame(step);
-      else el.textContent = prefix + (isFloat ? target.toFixed(1) : target) + suffix;
+      const progress = Math.min((now - startTime) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(ease * target * 10) / 10;
+      el.textContent = prefix + (Number.isInteger(target) ? Math.round(ease * target) : current) + suffix;
+      if (progress < 1) requestAnimationFrame(step);
     }
     requestAnimationFrame(step);
   }
 
   const counters = document.querySelectorAll('.counter-val');
   if (counters.length) {
-    const counterObs = new IntersectionObserver((entries) => {
+    const counterObserver = new IntersectionObserver((entries) => {
       entries.forEach(e => {
         if (e.isIntersecting) {
           animateCounter(e.target);
-          counterObs.unobserve(e.target);
+          counterObserver.unobserve(e.target);
         }
       });
     }, { threshold: 0.5 });
-    counters.forEach(c => counterObs.observe(c));
+    counters.forEach(c => counterObserver.observe(c));
   }
 
   /* ─── FAQ ACCORDION ─── */
   document.querySelectorAll('.faq-q').forEach(q => {
     q.addEventListener('click', () => {
       const row = q.closest('.faq-row');
-      const isOpen = row.classList.contains('open');
-      document.querySelectorAll('.faq-row.open').forEach(r => r.classList.remove('open'));
-      if (!isOpen) row.classList.add('open');
+      const wasOpen = row.classList.contains('open');
+      document.querySelectorAll('.faq-row').forEach(r => r.classList.remove('open'));
+      if (!wasOpen) row.classList.add('open');
     });
   });
 
   /* ─── WORK FILTER ─── */
   const filterBtns = document.querySelectorAll('.work-filter-btn');
-  const workItems = document.querySelectorAll('.work-item');
+  const workItems  = document.querySelectorAll('.work-item');
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       filterBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const cat = btn.dataset.cat;
       workItems.forEach(item => {
-        const visible = cat === 'all' || item.dataset.cat === cat;
-        item.style.display = visible ? '' : 'none';
+        if (cat === 'all' || item.dataset.cat === cat) {
+          item.style.display = 'flex';
+          setTimeout(() => { item.style.opacity = '1'; item.style.transform = 'translateY(0)'; }, 10);
+        } else {
+          item.style.opacity = '0';
+          item.style.transform = 'translateY(15px)';
+          setTimeout(() => { item.style.display = 'none'; }, 200);
+        }
       });
     });
   });
 
-  /* ─── MODAL ─── */
-  const backdrop = document.getElementById('modal-backdrop');
+  /* ─── MODAL TRIGGER & FORM SUBMIT ─── */
+  const modal = document.getElementById('modal-backdrop');
+  const modalClose = document.getElementById('modal-close');
   const modalForm = document.getElementById('modal-form');
+  const modalFormWrap = document.getElementById('modal-form-wrap');
   const modalSuccess = document.getElementById('modal-success');
 
-  document.querySelectorAll('[data-modal]').forEach(el => {
-    el.addEventListener('click', (e) => {
+  document.querySelectorAll('[data-modal]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
       e.preventDefault();
-      backdrop.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    });
-  });
-
-  document.getElementById('modal-close')?.addEventListener('click', () => {
-    backdrop.classList.remove('open');
-    document.body.style.overflow = '';
-  });
-
-  backdrop?.addEventListener('click', (e) => {
-    if (e.target === backdrop) {
-      backdrop.classList.remove('open');
-      document.body.style.overflow = '';
-    }
-  });
-
-  modalForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    modalForm.style.display = 'none';
-    modalSuccess.classList.add('show');
-    setTimeout(() => {
-      backdrop.classList.remove('open');
-      document.body.style.overflow = '';
-      setTimeout(() => {
-        modalForm.style.display = '';
-        modalSuccess.classList.remove('show');
-        modalForm.reset();
-      }, 600);
-    }, 3000);
-  });
-
-  /* ─── SMOOTH SCROLL ─── */
-  document.querySelectorAll('a[href^="#"]').forEach(a => {
-    a.addEventListener('click', e => {
-      const id = a.getAttribute('href').slice(1);
-      const target = document.getElementById(id);
-      if (target) {
-        e.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (modal) {
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
       }
     });
   });
+
+  if (modalClose && modal) {
+    modalClose.addEventListener('click', () => {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+      if (modalSuccess) modalSuccess.classList.remove('show');
+      if (modalFormWrap) modalFormWrap.style.display = 'block';
+    });
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    });
+  }
+
+  if (modalForm) {
+    modalForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (modalFormWrap) modalFormWrap.style.display = 'none';
+      if (modalSuccess) modalSuccess.classList.add('show');
+    });
+  }
+
+  /* ─── QUICK SERVICE CARD TO ESTIMATOR HOOK ─── */
+  window.jumpToEstimator = function(cat) {
+    const radio = document.querySelector(`input[name="est-cat"][value="${cat}"]`);
+    if (radio) {
+      radio.checked = true;
+      radio.dispatchEvent(new Event('change'));
+    }
+    const estSection = document.getElementById('estimator');
+    if (estSection) {
+      estSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
 })();
