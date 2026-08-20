@@ -1,7 +1,7 @@
 
 /* =============================================
-   PENGUIN TECH LIMITED — main.js v3
-   Interactive Constellation Canvas & UX Enhancements
+   PENGUIN TECH LIMITED — main.js v4
+   Mobile-Optimized Constellation & Touch Engine
    ============================================= */
 
 (function() {
@@ -10,7 +10,7 @@
   /* ─── NAV SCROLL ─── */
   const nav = document.getElementById('nav');
   function onScroll() {
-    if (nav) nav.classList.toggle('scrolled', window.scrollY > 40);
+    if (nav) nav.classList.toggle('scrolled', window.scrollY > 30);
   }
   window.addEventListener('scroll', onScroll, { passive: true });
 
@@ -19,8 +19,8 @@
   const mobileMenu = document.getElementById('mobile-nav-menu');
   if (toggle && mobileMenu) {
     toggle.addEventListener('click', () => {
-      mobileMenu.classList.toggle('open');
-      document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+      const isOpen = mobileMenu.classList.toggle('open');
+      document.body.style.overflow = isOpen ? 'hidden' : '';
     });
     mobileMenu.querySelectorAll('a').forEach(a => {
       a.addEventListener('click', () => {
@@ -35,9 +35,9 @@
     const h1 = document.querySelector('.hero-headline h1');
     const desc = document.querySelector('.hero-descriptor');
     const actions = document.querySelector('.hero-actions');
-    if (h1) setTimeout(() => h1.classList.add('animated'), 80);
-    if (desc) setTimeout(() => desc.classList.add('animated'), 240);
-    if (actions) setTimeout(() => actions.classList.add('animated'), 360);
+    if (h1) setTimeout(() => h1.classList.add('animated'), 60);
+    if (desc) setTimeout(() => desc.classList.add('animated'), 200);
+    if (actions) setTimeout(() => actions.classList.add('animated'), 320);
   });
 
   /* ─── INTERACTIVE PARTICLE & CONSTELLATION CANVAS ─── */
@@ -46,7 +46,7 @@
     const ctx = canvas.getContext('2d');
     const hero = document.getElementById('hero');
     let W = 0, H = 0, particles = [], rafId;
-    let mouse = { x: -1000, y: -1000, radius: 180 };
+    let mouse = { x: -1000, y: -1000, radius: 160 };
 
     function resize() {
       const rect = hero ? hero.getBoundingClientRect() : { width: window.innerWidth, height: window.innerHeight };
@@ -58,9 +58,9 @@
     Particle.prototype.reset = function() {
       this.x  = Math.random() * W;
       this.y  = Math.random() * H;
-      this.vx = (Math.random() - 0.5) * 0.4;
-      this.vy = (Math.random() - 0.5) * 0.4;
-      this.r  = Math.random() * 1.5 + 0.6;
+      this.vx = (Math.random() - 0.5) * (window.innerWidth < 768 ? 0.25 : 0.4);
+      this.vy = (Math.random() - 0.5) * (window.innerWidth < 768 ? 0.25 : 0.4);
+      this.r  = Math.random() * 1.4 + 0.6;
       this.baseAlpha = Math.random() * 0.35 + 0.12;
       this.alpha = this.baseAlpha;
     };
@@ -68,17 +68,19 @@
       this.x += this.vx;
       this.y += this.vy;
 
-      // Mouse proximity interaction
-      const dx = mouse.x - this.x;
-      const dy = mouse.y - this.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < mouse.radius) {
-        const force = (1 - dist / mouse.radius) * 0.8;
-        this.x -= (dx / dist) * force;
-        this.y -= (dy / dist) * force;
-        this.alpha = Math.min(0.8, this.baseAlpha + (1 - dist / mouse.radius) * 0.5);
-      } else {
-        this.alpha = this.baseAlpha;
+      // Mouse proximity interaction (desktop only for performance)
+      if (mouse.x > 0 && mouse.y > 0) {
+        const dx = mouse.x - this.x;
+        const dy = mouse.y - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < mouse.radius) {
+          const force = (1 - dist / mouse.radius) * 0.8;
+          this.x -= (dx / dist) * force;
+          this.y -= (dy / dist) * force;
+          this.alpha = Math.min(0.8, this.baseAlpha + (1 - dist / mouse.radius) * 0.5);
+        } else {
+          this.alpha = this.baseAlpha;
+        }
       }
 
       if (this.x < -10 || this.x > W + 10 || this.y < -10 || this.y > H + 10) this.reset();
@@ -93,11 +95,12 @@
     function init() {
       resize();
       particles = [];
-      const count = Math.min(130, Math.max(45, Math.round((W * H) / 9500)));
+      const isMobile = window.innerWidth < 768;
+      const count = isMobile ? 35 : Math.min(120, Math.max(45, Math.round((W * H) / 9500)));
       for (let i = 0; i < count; i++) particles.push(new Particle());
     }
 
-    const CONN = 140;
+    const CONN = window.innerWidth < 768 ? 100 : 140;
 
     function animate() {
       ctx.clearRect(0, 0, W, H);
@@ -162,7 +165,7 @@
           observer.unobserve(e.target);
         }
       });
-    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
     revealEls.forEach(el => observer.observe(el));
   }
 
@@ -171,7 +174,7 @@
     const target = parseFloat(el.dataset.target);
     const suffix = el.dataset.suffix || '';
     const prefix = el.dataset.prefix || '';
-    const duration = 1800;
+    const duration = 1600;
     const startTime = performance.now();
 
     function step(now) {
@@ -193,7 +196,7 @@
           counterObserver.unobserve(e.target);
         }
       });
-    }, { threshold: 0.5 });
+    }, { threshold: 0.3 });
     counters.forEach(c => counterObserver.observe(c));
   }
 
