@@ -251,17 +251,16 @@
   });
 
   if (modalClose && modal) {
-    modalClose.addEventListener('click', () => {
+    function closeModal() {
       modal.classList.remove('open');
       document.body.style.overflow = '';
       if (modalSuccess) modalSuccess.classList.remove('show');
       if (modalFormWrap) modalFormWrap.style.display = 'block';
-    });
+      if (modalForm) modalForm.reset();
+    }
+    modalClose.addEventListener('click', closeModal);
     modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        modal.classList.remove('open');
-        document.body.style.overflow = '';
-      }
+      if (e.target === modal) closeModal();
     });
   }
 
@@ -272,6 +271,17 @@
       if (modalSuccess) modalSuccess.classList.add('show');
     });
   }
+
+  /* ─── ESCAPE KEY CLOSES MODAL ─── */
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal && modal.classList.contains('open')) {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+      if (modalSuccess) modalSuccess.classList.remove('show');
+      if (modalFormWrap) modalFormWrap.style.display = 'block';
+      if (modalForm) modalForm.reset();
+    }
+  });
 
   /* ─── QUICK SERVICE CARD TO ESTIMATOR JUMP ─── */
   window.jumpToEstimator = function(cat) {

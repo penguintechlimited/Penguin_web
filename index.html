@@ -47,7 +47,7 @@
   <a href="#estimator">Pricing</a>
   <a href="#work">Case Studies</a>
   <a href="#faq">FAQ</a>
-  <a href="#" data-modal style="color:var(--primary);font-weight:800;">Start a Project &rarr;</a>
+  <a href="#" data-modal style="color:var(--primary);font-weight:800;font-size:18px;padding:14px 0;border-bottom:1px solid var(--line);display:block;">Start a Project &rarr;</a>
 </div>
 
 <!-- HERO -->
@@ -248,7 +248,7 @@
       </div>
       <div class="service-card-bottom">
         <span class="service-price-tag">From &#2547;8,000/mo</span>
-        <a href="#estimator" onclick="jumpToEstimator('automation')" class="service-card-link">Configure &rarr;</a>
+        <a href="#estimator" onclick="jumpToEstimator('seo')" class="service-card-link">Configure &rarr;</a>
       </div>
     </div>
   </div>
@@ -585,20 +585,20 @@
       <h3>Let's talk growth.</h3>
       <p>Fill out the form below and our team will get back to you with a tailored technical roadmap within 4 business hours.</p>
       
-      <form id="modal-form">
+      <form id="modal-form" novalidate>
         <div class="form-row">
-          <div><label class="form-label">First Name</label><input type="text" class="form-input" placeholder="Rahim" required/></div>
-          <div><label class="form-label">Last Name</label><input type="text" class="form-input" placeholder="Uddin" required/></div>
+          <div><label class="form-label">First Name</label><input type="text" name="first_name" class="form-input" placeholder="Rahim" autocomplete="given-name" required/></div>
+          <div><label class="form-label">Last Name</label><input type="text" name="last_name" class="form-input" placeholder="Uddin" autocomplete="family-name" required/></div>
         </div>
         
         <label class="form-label">Phone / WhatsApp Number</label>
-        <input type="tel" class="form-input" placeholder="+880 1XXX-XXXXXX" required/>
+        <input type="tel" name="phone" class="form-input" placeholder="+880 1XXX-XXXXXX" autocomplete="tel" required/>
         
         <label class="form-label">Company / Organization</label>
-        <input type="text" class="form-input" placeholder="Your Business Name"/>
+        <input type="text" name="company" class="form-input" placeholder="Your Business Name" autocomplete="organization"/>
         
         <label class="form-label">Service Needed</label>
-        <select class="form-select form-input">
+        <select name="service" class="form-select form-input">
           <option>Web Design &amp; Development</option>
           <option>E-Commerce Store (bKash/Nagad)</option>
           <option>Mobile App (iOS &amp; Android)</option>
@@ -615,7 +615,9 @@
     </div>
     
     <div class="modal-success" id="modal-success">
-      <div class="modal-success-icon">&#10003;</div>
+      <div class="modal-success-icon">
+        <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+      </div>
       <h4>Inquiry Received!</h4>
       <p>Thank you. Our senior technical consultant will review your specifications and contact you on WhatsApp / Phone within 4 business hours.</p>
     </div>
