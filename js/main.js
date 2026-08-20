@@ -43,42 +43,45 @@
   const canvas = document.getElementById('hero-canvas');
   if (canvas) {
     const ctx = canvas.getContext('2d');
-    let W, H, particles = [], rafId;
+    const hero = document.getElementById('hero');
+    let W = 0, H = 0, particles = [], rafId;
 
+    // FIX: read from parent hero element, not canvas itself (canvas has no intrinsic size)
     function resize() {
-      W = canvas.width = canvas.offsetWidth;
-      H = canvas.height = canvas.offsetHeight;
+      const rect = hero ? hero.getBoundingClientRect() : { width: window.innerWidth, height: window.innerHeight };
+      W = canvas.width = Math.round(rect.width || window.innerWidth);
+      H = canvas.height = Math.round(rect.height || window.innerHeight);
     }
 
-    function Particle() {
-      this.reset();
-    }
+    function Particle() { this.reset(); }
     Particle.prototype.reset = function() {
-      this.x = Math.random() * W;
-      this.y = Math.random() * H;
-      this.vx = (Math.random() - 0.5) * 0.4;
-      this.vy = (Math.random() - 0.5) * 0.4;
-      this.r = Math.random() * 1.2 + 0.3;
-      this.alpha = Math.random() * 0.35 + 0.05;
+      this.x  = Math.random() * W;
+      this.y  = Math.random() * H;
+      this.vx = (Math.random() - 0.5) * 0.45;
+      this.vy = (Math.random() - 0.5) * 0.45;
+      this.r  = Math.random() * 1.4 + 0.4;
+      this.alpha = Math.random() * 0.4 + 0.08;
     };
     Particle.prototype.update = function() {
       this.x += this.vx;
       this.y += this.vy;
-      if (this.x < 0 || this.x > W || this.y < 0 || this.y > H) this.reset();
+      if (this.x < -5 || this.x > W + 5 || this.y < -5 || this.y > H + 5) this.reset();
     };
     Particle.prototype.draw = function() {
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(0,240,255,${this.alpha})`;
+      ctx.fillStyle = 'rgba(0,240,255,' + this.alpha + ')';
       ctx.fill();
     };
 
     function init() {
       resize();
-      particles = Array.from({ length: 120 }, () => new Particle());
+      particles = [];
+      const count = Math.min(150, Math.round((W * H) / 8000));
+      for (let i = 0; i < count; i++) particles.push(new Particle());
     }
 
-    const CONNECTION_DIST = 140;
+    const CONN = 150;
 
     function animate() {
       ctx.clearRect(0, 0, W, H);
@@ -88,13 +91,14 @@
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
           const dy = particles[i].y - particles[j].y;
-          const d = Math.sqrt(dx*dx + dy*dy);
-          if (d < CONNECTION_DIST) {
+          const d = dx*dx + dy*dy;
+          if (d < CONN * CONN) {
+            const dist = Math.sqrt(d);
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(0,240,255,${(1 - d/CONNECTION_DIST) * 0.09})`;
-            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = 'rgba(0,240,255,' + ((1 - dist/CONN) * 0.10) + ')';
+            ctx.lineWidth = 0.6;
             ctx.stroke();
           }
         }
@@ -102,9 +106,17 @@
       rafId = requestAnimationFrame(animate);
     }
 
-    init();
-    animate();
-    window.addEventListener('resize', () => { cancelAnimationFrame(rafId); init(); animate(); });
+    // FIX: wait for layout paint before reading dimensions
+    requestAnimationFrame(function() {
+      init();
+      animate();
+    });
+
+    window.addEventListener('resize', function() {
+      cancelAnimationFrame(rafId);
+      init();
+      animate();
+    }, { passive: true });
   }
 
   /* ─── SCROLL REVEAL ─── */
