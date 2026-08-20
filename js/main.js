@@ -70,7 +70,7 @@
     Particle.prototype.draw = function() {
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0,240,255,' + this.alpha + ')';
+      ctx.fillStyle = 'rgba(0,87,255,' + this.alpha + ')';
       ctx.fill();
     };
 
@@ -97,7 +97,7 @@
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = 'rgba(0,240,255,' + ((1 - dist/CONN) * 0.10) + ')';
+            ctx.strokeStyle = 'rgba(0,87,255,' + ((1 - dist/CONN) * 0.12) + ')';
             ctx.lineWidth = 0.6;
             ctx.stroke();
           }
